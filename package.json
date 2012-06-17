@@ -1,0 +1,22 @@
+{
+    "name": "flow"
+  , "version": "1.0.0"
+  , "description": "Simplifies asynchronous control flow in javascript making making  parallel code, synchronous code, and error handling simple"
+  , "homepage": "https://github.com/freethenation/flow"
+  , "keywords": ["async", "parallel", "synchronous", "coffee", "callback", "flow", "control"]
+  , "author": "Richard Klafter <rpklafter@yahoo.com>"
+  , "contributors": [
+        { "name": "Richard Klafter", "email": "rpklafter@yahoo.com" }
+  , "repository":{
+        "type": "git"
+      , "url": "https://github.com/freethenation/flow.git"
+    }
+  , "dependencies": { }
+  , "devDependencies": {
+        "coffee-script": "1.3.3"
+      , "uglify-js": "1.3.0"
+    }
+  , "main": "index"
+  , "engines": { "node": ">= 0.4.0" }
+  , "scripts": { }
+}
