@@ -1,15 +1,15 @@
 {
-    "name": "flow"
+    "name": "funcflow"
   , "version": "1.0.0"
   , "description": "Simplifies asynchronous control flow in javascript making making  parallel code, synchronous code, and error handling simple"
-  , "homepage": "https://github.com/freethenation/flow"
+  , "homepage": "https://github.com/freethenation/funcflow"
   , "keywords": ["async", "parallel", "synchronous", "coffee", "callback", "flow", "control"]
   , "author": "Richard Klafter <rpklafter@yahoo.com>"
   , "contributors": [
         { "name": "Richard Klafter", "email": "rpklafter@yahoo.com" }
   , "repository":{
         "type": "git"
-      , "url": "https://github.com/freethenation/flow.git"
+      , "url": "https://github.com/freethenation/funcflow.git"
     }
   , "dependencies": { }
   , "devDependencies": {
