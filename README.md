@@ -3,14 +3,14 @@ Simplifies asynchronous control flow in coffeescript making parallel code, synch
 # Why make another control flow library?
 ___
 * One often desires to pass additional state to all the functions. Most of the control flow libraries I have seen do not allow for this. The issue can be worked around with a closure but closures are exactly what we are trying to avoid!
-* There are tons of control flow libraries out there but none of them seem to play well with coffee script, that is they all override this which does not play well with coffeescript's ()=> syntax.
+* There are tons of control flow libraries out there but none of them seem to play well with coffeescript; they all override `this` which does not play well with coffeescript's bound function (`()=>`) syntax.
 
 # Features
 ___
 * Makes it easy to write synchronous code without nested callbacks
-* Makes it easy to write parallel code without keeping track of all pesky callbacks
-* Allows all your functions to easily share state without using a closure.
-* Designed to be compatible with coffee script's cool features
+* Makes it easy to write parallel code without keeping track of all the pesky callbacks
+* Allows all your functions to easily share state without using a closure
+* Designed to be compatible with coffeescript's cool features
 * Works in nodejs and the browser
 
 # How to install
@@ -19,8 +19,8 @@ ___
 # Basic usage
 ___
 FuncFlow is really easy to use and consists of a single function to which you pass an array of functions to call.
-The first parameter tp each function is a reference to a step object which allows you to control the flow of the program.
-The second parameter to each functions is an error iff the last function to be called through an error.
+The first parameter to each function is a reference to a `step` object which allows you to control the flow of the program.
+If the previous function threw an error, it is passed as the second parameter to the next function. If there was no error, `null` is passed instead.
     
     steps = []
     steps.push (step, err)->
@@ -29,7 +29,7 @@ The second parameter to each functions is an error iff the last function to be c
     steps.push (step, err)->
         console.log("working on second thing whos callback returns stuff")
         setTimeout(300, step.next, "someString", 6969)
-    # if the function calling the callback passes arguments they are passed as additional arguments.
+    # if the function calling the callback passes arguments, they are passed as additional arguments to the function.
     steps.push (step, err, someString, someNumber)->
         console.log("callback argument 1: " + someString)
         console.log("callback argument 2: " + someNumber)
@@ -58,7 +58,7 @@ Any errors that are thrown within a step are passed to the next step to be handl
 # Parallel code
 ___
 Using the spawn function on the step object you can run tasks in parallel and the next step will only be 
-ran when all of the tasks are complete
+run when all of the tasks are complete
 
     steps = []
     steps.push (step, err)->
@@ -72,7 +72,7 @@ ran when all of the tasks are complete
     funcflow(steps, ()->console.log('we are done!'))
 # Sharing state
 ___
-Using an optional parameter state can be passed to all the step functions
+Using an optional parameter, state can be passed to all the step functions
 
     steps = []
     steps.push (step, err)->
@@ -91,7 +91,7 @@ Using an optional parameter state can be passed to all the step functions
     funcflow = require('funcflow')
     funcflow(steps, sharedStateObject, ()->console.log('we are done!'))
 
-The above code would output the following to th console
+The above code would output the following to the console
 
     Starting Step 1
     step 1 has not modified me
