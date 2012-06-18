@@ -49,10 +49,9 @@ class Flow
         _run([undefined])
         return
 
-flow=(steps, ops, callback, run=true)->
-    ret = new Flow(steps, ops, callback)
-    if run then ret.run()
-    return ret
+flow=(steps, ops, callback)->
+    (new Flow(steps, ops, callback)).run()
+    return
 
 if(typeof(window)=='undefined') then module.exports = flow
 else window.flow = flow
