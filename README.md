@@ -4,6 +4,7 @@ Simplifies asynchronous control flow in coffeescript making parallel code, synch
 ___
 * One often desires to pass additional state to all the functions. Most of the control flow libraries I have seen do not allow for this. The issue can be worked around with a closure but closures are exactly what we are trying to avoid!
 * There are tons of control flow libraries out there but none of them seem to play well with coffee script, that is they all override this which does not play well with coffeescript's ()=> syntax.
+
 # Features
 ___
 * Makes it easy to write synchronous code without nested callbacks
