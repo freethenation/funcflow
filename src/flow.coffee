@@ -54,5 +54,5 @@ flow=(steps, ops, callback, run=true)->
     if run then ret.run()
     return ret
 
-if(typeof(window)=='undefined') { module.exports = flow; }
-else { window.flow = flow; }
+if(typeof(window)=='undefined') then module.exports = flow
+else window.flow = flow
