@@ -13,9 +13,9 @@ class FlowStep
     spawn:()=>
         @_unjoinedThreadCount++
         threadId=@threads.length
-        @threads.push([undefined])
+        @threads.push([null])
         return (args...)=>
-            args.unshift(undefined)
+            args.unshift(null)
             @threads[threadId] = args
             @_unjoinedThreadCount--
             @_next()
@@ -46,7 +46,7 @@ class Flow
             i++
             if i < @steps.length
                new FlowStep(@steps[i], lastReturn, @ops, _run)
-        _run([undefined])
+        _run([null])
         return
 
 flow=(steps, ops, callback)->

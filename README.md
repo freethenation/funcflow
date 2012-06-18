@@ -47,11 +47,11 @@ Any errors that are thrown within a step are passed to the next step to be handl
     steps.push (step, err)->
         raise "I am the first step and I am throwing an error"
     steps.push (step, err)->
-        if err
+        if err == null
             console.log("The first step raised an error")
         step.next()
     steps.push (step, err)->
-        # You can use the "raise" function on the step object so that your error will bot be caught
+        # You can use the "raise" function on the step object so that your error will not be caught
         step.raise("This error is not going to be caught and will bubble out") 
     funcflow = require('funcflow')
     funcflow(steps, ()->console.log('we are done!'))
@@ -91,7 +91,7 @@ Using an optional parameter state can be passed to all the step functions
     funcflow = require('funcflow')
     funcflow(steps, sharedStateObject, ()->console.log('we are done!'))
 
-The above code would output the following to th console
+The above code would output the following to the console
 
     Starting Step 1
     step 1 has not modified me
