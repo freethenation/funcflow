@@ -1,10 +1,12 @@
 class FlowStep
-    constructor:(func, lastReturn, ops, @callback)->
-        @[op]=ops[op] for op of ops
+    constructor:(func, lastReturn, state, @callback)->
+        state.next = @next
+        state.spawn = @spawn
+        state.raise = @raise
         @threads=[]
         @_unjoinedThreadCount=1
         try
-            lastReturn.unshift(this)
+            lastReturn.unshift(state)
             func.apply(null, lastReturn)
         catch ex
             console.log(ex)
@@ -32,25 +34,25 @@ class FlowStep
         return
 
 class Flow
-    constructor:(@steps, ops=null, callback=null)->
+    constructor:(@steps, state=null, callback=null)->
         if not callback?
-            callback = ops
-            ops = null
+            callback = state
+            state = null
         if not callback? then callback=()->
-        if not ops? then ops = {}
+        if not state? then state = {}
         @steps.push(callback)
-        @ops = ops
+        @state = state
     run:()=>
         i=-1
         _run=(lastReturn)=>
             i++
             if i < @steps.length
-               new FlowStep(@steps[i], lastReturn, @ops, _run)
+                step = new FlowStep(@steps[i], lastReturn, @state, _run)
         _run([null])
         return
 
-flow=(steps, ops, callback)->
-    (new Flow(steps, ops, callback)).run()
+flow=(steps, state, callback)->
+    (new Flow(steps, state, callback)).run()
     return
 
 if(typeof(window)=='undefined') then module.exports = flow
