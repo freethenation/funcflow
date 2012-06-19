@@ -77,12 +77,15 @@
 
   test("basic error handling", function() {
     var _this = this;
-    this.expect(1);
+    this.expect(2);
     return funcflow([
       function(step, err) {
         throw "some error";
       }, function(step, err) {
         _this.equal(err, "some error");
+        return step.next();
+      }, function(step, err) {
+        _this.equal(err, null);
         return step.next();
       }
     ], this.done);
@@ -124,6 +127,33 @@
       }
     ]);
     return this.done();
+  });
+
+  test("basic state test", function() {
+    var sharedState,
+      _this = this;
+    this.expect(4);
+    sharedState = {
+      sharedstr: "not modified",
+      sharedfunc: function() {
+        return true;
+      }
+    };
+    return funcflow([
+      function(step, err) {
+        _this.equal(step.sharedstr, "not modified");
+        _this.equal(step.sharedfunc(), true);
+        step.sharedstr = "modified";
+        step.sharedfunc = function() {
+          return false;
+        };
+        return step.next();
+      }, function(step, err) {
+        _this.equal(step.sharedstr, "modified");
+        _this.equal(step.sharedfunc(), false);
+        return step.next();
+      }
+    ], sharedState, this.done);
   });
 
 }).call(this);

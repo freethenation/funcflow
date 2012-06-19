@@ -50,12 +50,15 @@ test "parallel code", ()->
     ], @done)
 
 test "basic error handling", ()->
-    @expect(1)
+    @expect(2)
     funcflow([
         (step, err)=>
             throw "some error"
         (step, err)=>
             @equal(err, "some error")
+            step.next()
+        (step, err)=>
+            @equal(err, null)
             step.next()
     ], @done)
 
@@ -87,3 +90,22 @@ test "no callback", ()->
             @ok(true)
     ])
     @done()
+
+test "basic state test", ()->
+    @expect(4)
+    sharedState = {
+        sharedstr: "not modified"
+        sharedfunc: ()->true
+    }
+    funcflow([
+        (step, err)=>
+            @equal(step.sharedstr, "not modified")
+            @equal(step.sharedfunc(), true)
+            step.sharedstr = "modified"
+            step.sharedfunc = ()->false
+            step.next()
+        (step, err)=>
+            @equal(step.sharedstr, "modified")
+            @equal(step.sharedfunc(), false)
+            step.next()
+    ], sharedState, @done)
