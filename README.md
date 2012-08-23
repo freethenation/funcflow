@@ -48,7 +48,7 @@ Any errors that are thrown within a step are passed to the next step to be handl
     steps.push (step, err)->
         raise "I am the first step and I am throwing an error"
     steps.push (step, err)->
-        if err == null
+        if err != null
             console.log("The first step raised an error")
         step.next()
     steps.push (step, err)->
