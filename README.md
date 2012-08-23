@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/freethenation/funcflow.png)](http://travis-ci.org/freethenation/funcflow)
 # FuncFlow
 Simplifies asynchronous control flow in coffeescript making parallel code, synchronous code, and error handling simple
 # Why make another control flow library?
