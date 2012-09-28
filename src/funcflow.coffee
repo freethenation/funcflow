@@ -9,7 +9,6 @@ class FlowStep
             lastReturn.unshift(state)
             func.apply(null, lastReturn)
         catch ex
-            console.log(ex)
             @callback([ex])
     raise:(ex)->throw ex
     spawn:()=>
@@ -55,5 +54,5 @@ flow=(steps, state, callback)->
     (new Flow(steps, state, callback)).run()
     return
 
-if(typeof(window)=='undefined') then module.exports = flow
+if(typeof(module)!='undefined') then module.exports = flow
 else window.flow = flow
