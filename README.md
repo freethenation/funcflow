@@ -26,10 +26,10 @@ If the previous function threw an error, it is passed as the second parameter to
     steps = []
     steps.push (step, err)->
         console.log("working on the first thing")
-        setTimeout(300, step.next)
+        setTimeout(step.next, 300)
     steps.push (step, err)->
         console.log("working on second thing whos callback returns stuff")
-        setTimeout(300, step.next, "someString", 6969)
+        setTimeout(step.next, 300, "someString", 6969)
     # if the function calling the callback passes arguments, they are passed as additional arguments to the function.
     steps.push (step, err, someString, someNumber)->
         console.log("callback argument 1: " + someString)
@@ -64,9 +64,9 @@ run when all of the tasks are complete
     steps = []
     steps.push (step, err)->
         console.log("Starting the first task")
-        setTimeout(300, step.spawn())
+        setTimeout(step.spawn(), 300)
         console.log("Starting the second task")
-        setTimeout(600, step.spawn())
+        setTimeout(step.spawn(), 600)
         #tasks are started immediately so you should call next to let the library know you are done spawning tasks
         step.next() 
     funcflow = require('funcflow')
@@ -80,11 +80,11 @@ Using an optional parameter, state can be passed to all the step functions
         step.sharedFunc(1)
         console.log(step.sharedString)
         step.sharedString = "step 1 has been here"
-        setTimeout(300, step.next)
+        setTimeout(step.next, 300)
     steps.push (step, err)->
         step.sharedFunc(2)
         console.log(step.sharedString)
-        setTimeout(300, step.next)
+        setTimeout(step.next, 300)
     sharedStateObject = {
         sharedString:"step 1 has not modified me"
         sharedFunc:(stepNum)->console.log("Starting Step " + stepNum)
