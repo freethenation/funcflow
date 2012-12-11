@@ -1,47 +1,42 @@
-{exec} = require 'child_process'
+fs = require 'fs'
 
 task 'build', 'compiles src/funcflow.coffee to lib/funcflow.js', ->
-    compile()
-
-task 'build:watch', 'watches src/funcflow.coffee and rebuilds when a change is detected', ->
-    watch()
+    readFile('./src/funcflow.coffee', (file)->compile(file, (file)->writeFile('./lib/funcflow.js', file, ()->console.log('Compiled "funcflow.js"!'))))
 
 task 'build:min', 'compiles src/funcflow.coffee to lib/funcflow.js and then runs UglifyJS on it', ->
-    compile(()=>compress())
+    invoke('build')
+    setTimeout((()->readFile('./lib/funcflow.js', (file)->compress(file, (file)->writeFile('./lib/funcflow.min.js',  file, ()->console.log('Compiled "funcflow.min.js"!'))))), 1500)
 
 task 'build:full', 'compiles src/funcflow.coffee, runs all tests, and minifies', ->
-    compile(()->compress(()->compileTest(()->test())))
-
+    invoke('build:min')
+    setTimeout((()->invoke('test')), 3000)
+    
 task 'test', 'compiles src/funcflow.coffee and then runs tests on it', ->
-    compile(()->compileTest(()->test()))
+    invoke('build')
+    setTimeout(
+        (()->readFile('./tests/tests.coffee', (file)->compile(file, (file)->writeFile('./tests/tests.js', file, ()->test('./tests/tests.js', ()->console.log('Tested "funcflow.coffee" successful!')))))),
+        1500)
+    
+compile = (inputFile, callback) ->
+    coffee = require 'coffee-script'
+    callback?(coffee.compile(inputFile))
 
-test = (callback) ->
-    console.log "Testing funcflow.coffee"
-    exec 'nodeunit tests/tests.js', (err, stdout, stderr) ->
-        throw err if err
-        console.log "Tested funcflow.coffee"
-        callback?()
+compress = (inputFile, callback) ->
+    uglify = require "uglify-js"
+    ast = uglify.parser.parse(inputFile); # parse code and get the initial AST
+    ast = uglify.uglify.ast_mangle(ast); # get a new AST with mangled names
+    ast = uglify.uglify.ast_squeeze(ast); # get an AST with compression optimizations
+    callback?(uglify.uglify.gen_code(ast))
+    
+ readFile = (filename, callback) ->
+    data = fs.readFile(filename, 'utf8', (err, data)-> if err then throw err else callback(data))
+ 
+ writeFile = (filename, data, callback) ->
+     fs.writeFile(filename, data, 'utf8', (err)-> if err then throw err else callback())
 
-compileTest = (callback) ->
-    exec 'coffee -c tests/', (err, stdout, stderr) ->
-        throw err if err
-        console.log "Compiled tests.coffee"
-        callback?()
-
-watch = (callback) ->
-    exec 'coffee -w -o lib/ -c src/', (err, stdout, stderr) ->
-        throw err if err
-        callback?()
-
-compile = (callback) ->
-    exec 'coffee -o lib/ -c src/', (err, stdout, stderr) ->
-        throw err if err
-        console.log "Compiled funcflow.coffee"
-        callback?()
-
-compress = (callback) ->
-    exec 'uglifyjs -o lib/funcflow.min.js lib/funcflow.js', (err, stdout, stderr) ->
-        throw err if err
-        console.log "Compressed funcflow.js"
-        callback?()
-
+#'nodeunit tests/tests.js',
+     
+test = (inputFile, callback) ->
+    console.log 'Testing "funcflow.coffee"'
+    test = require("./tests/tests.js")
+    callback()

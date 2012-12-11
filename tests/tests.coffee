@@ -19,7 +19,7 @@ test=(name, func)->
 callMeBack=(func, args...)->
     func.apply(null, args)
 
-funcflow=require('../lib/funcflow.js')
+funcflow=require("../lib/funcflow")
 
 test "basic", ()->
     steps = []
@@ -77,10 +77,12 @@ test "parallel error handling", ()->
 
 test "bubble error handling", ()->
     @expect(1)
-    @throws(funcflow([
-        (step, err)=>
-            step.raise("some error")
-    ], ()->))
+    exThrown = false
+    try
+        funcflow([(step, err)=>step.raise("some error")])
+    catch ex
+        exThrown = true
+    @ok(exThrown)
     @done()
 
 test "no callback", ()->

@@ -1,16 +1,26 @@
 class FlowStep
     constructor:(func, lastReturn, state, @callback)->
+        if !state.catchExceptions? then state.catchExceptions = true
+        @state = state
         state.next = @next
         state.spawn = @spawn
         state.raise = @raise
         @threads=[]
         @_unjoinedThreadCount=1
-        try
-            lastReturn.unshift(state)
-            func.apply(null, lastReturn)
-        catch ex
-            @callback([ex])
-    raise:(ex)->throw ex
+        if @state.catchExceptions
+          try
+              lastReturn.unshift(state)
+              func.apply(null, lastReturn)
+          catch ex
+              if @state.catchExceptions then @callback([ex]) else throw ex
+        else
+          lastReturn.unshift(state)
+          func.apply(null, lastReturn)
+    raise:(ex)=>
+      @state.catchExceptions = false
+      if typeof ex == "undefined" or ex == null
+        throw "Can not raise null or undefined exception. Call to step.raise() has failed!"
+      throw ex
     spawn:()=>
         @_unjoinedThreadCount++
         threadId=@threads.length
@@ -55,4 +65,4 @@ flow=(steps, state, callback)->
     return
 
 if(typeof(module)!='undefined') then module.exports = flow
-else window.flow = flow
+else window.funcflow = flow
