@@ -1,30 +1,78 @@
 (function() {
-  var callMeBack, funcflow, test,
+  var Test, callMeBack, funcflow, str, test,
     __slice = [].slice;
 
-  test = function(name, func) {
-    return exports[name] = function(test) {
-      var doneCalled, oldDone, oldExpect;
-      doneCalled = false;
-      oldDone = test.done;
-      test.done = function() {
-        if (!doneCalled) {
-          doneCalled = true;
-          test.ok(true);
-          return oldDone();
-        }
-      };
-      oldExpect = test.expect;
-      test.expect = function(num) {
-        return oldExpect(num + 1);
-      };
-      try {
-        return func.call(test);
-      } catch (ex) {
-        test.ok(false, ex.toString());
-        return test.done();
+  str = function(obj) {
+    if (obj === null) {
+      return "null";
+    } else if (typeof obj === "undefined") {
+      return "undefined";
+    } else {
+      return obj.toString();
+    }
+  };
+
+  Test = (function() {
+
+    function Test(name, func) {
+      this.name = name;
+      this.func = func;
+      this.num = 0;
+    }
+
+    Test.prototype.expect = function(num) {
+      return this.num = num;
+    };
+
+    Test.prototype.equal = function(arg1, arg2) {
+      this.num--;
+      if (arg1 !== arg2) {
+        throw "'" + (str(arg1)) + "' does not equal '" + (str(arg2)) + "'";
       }
     };
+
+    Test.prototype.ok = function(bool) {
+      this.num--;
+      if (!bool) {
+        throw "false was passed to ok";
+      }
+    };
+
+    Test.prototype.done = function() {
+      if (this.num !== 0) {
+        throw "" + (str(this.num)) + " more checks were expected before done was called";
+      }
+    };
+
+    Test.prototype.run = function() {
+      return this.func.call(this);
+    };
+
+    return Test;
+
+  })();
+
+  test = function(name, func) {
+    var t;
+    t = new Test(name, func);
+    return exports[name] = function() {
+      return t.run();
+    };
+  };
+
+  exports.RunAll = function() {
+    var name;
+    for (name in exports) {
+      if (name !== "RunAll") {
+        try {
+          exports[name]();
+        } catch (ex) {
+          console.log("Error in Test '" + name + "'");
+          console.log(ex);
+          console.log('');
+        }
+      }
+    }
   };
 
   callMeBack = function() {
@@ -35,7 +83,7 @@
 
   funcflow = require("../lib/funcflow");
 
-  test("basic", function() {
+  test("Basic", function() {
     var steps,
       _this = this;
     steps = [];
@@ -48,7 +96,7 @@
     return funcflow(steps, this.done);
   });
 
-  test("callback parameters", function() {
+  test("CallbackParameters", function() {
     var _this = this;
     this.expect(2);
     return funcflow([
@@ -62,7 +110,7 @@
     ], this.done);
   });
 
-  test("parallel code", function() {
+  test("ParallelCode", function() {
     var _this = this;
     return funcflow([
       function(step, err) {
@@ -74,7 +122,7 @@
     ], this.done);
   });
 
-  test("basic error handling", function() {
+  test("BasicErrorHandling", function() {
     var _this = this;
     this.expect(2);
     return funcflow([
@@ -90,7 +138,7 @@
     ], this.done);
   });
 
-  test("parallel error handling", function() {
+  test("ParallelErrorHandling", function() {
     var _this = this;
     this.expect(1);
     return funcflow([
@@ -106,9 +154,8 @@
     ], this.done);
   });
 
-  test("bubble error handling", function() {
-    var exThrown,
-      _this = this;
+  test("BubbleErrorHandling", function() {
+    var exThrown;
     this.expect(1);
     exThrown = false;
     try {
@@ -124,7 +171,26 @@
     return this.done();
   });
 
-  test("no callback", function() {
+  test("DontCatchExceptions", function() {
+    var exThrown;
+    this.expect(1);
+    exThrown = false;
+    try {
+      funcflow([
+        function(step, err) {
+          return math.kj;
+        }
+      ], {
+        catchExceptions: false
+      }, function() {});
+    } catch (ex) {
+      exThrown = true;
+    }
+    this.ok(exThrown);
+    return this.done();
+  });
+
+  test("NoCallback", function() {
     var _this = this;
     this.expect(1);
     funcflow([
@@ -135,7 +201,7 @@
     return this.done();
   });
 
-  test("basic state test", function() {
+  test("BasicStateTest", function() {
     var sharedState,
       _this = this;
     this.expect(4);

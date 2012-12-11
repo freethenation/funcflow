@@ -1,27 +1,45 @@
-test=(name, func)->
-    exports[name]=(test)->
-        doneCalled = false
-        oldDone = test.done
-        test.done=()->
-            if !doneCalled
-                doneCalled = true
-                test.ok(true)
-                oldDone()
-        oldExpect = test.expect
-        test.expect=(num)->
-            oldExpect(num+1)
-        try
-            func.call(test)
-        catch ex
-            test.ok(false, ex.toString())
-            test.done()
+str=(obj)->
+    if obj == null then "null"
+    else if typeof obj == "undefined" then "undefined"
+    else obj.toString()
 
+class Test
+    constructor:(@name, @func)->
+        @num = 0
+    expect:(num)->
+        @num = num
+    equal:(arg1, arg2)->
+        @num--
+        if arg1 != arg2 then throw "'#{str(arg1)}' does not equal '#{str(arg2)}'"
+    ok:(bool)->
+        @num--
+        if not bool then throw "false was passed to ok"
+    done:()->
+        if @num != 0 then throw "#{str(@num)} more checks were expected before done was called"
+    run:()->
+        @func.call(this)
+        
+test=(name, func)->
+    t = new Test(name, func)
+    exports[name]=()->t.run()
+
+exports.RunAll = ()->
+    for name of exports
+        if name != "RunAll"
+            try
+                exports[name]()
+            catch ex
+                console.log "Error in Test '#{name}'"
+                console.log ex
+                console.log ''
+    return
+    
 callMeBack=(func, args...)->
     func.apply(null, args)
 
 funcflow=require("../lib/funcflow")
 
-test "basic", ()->
+test "Basic", ()->
     steps = []
     steps.push (step, err)=>
         callMeBack(step.next, 1, 2, 3)
@@ -29,7 +47,7 @@ test "basic", ()->
         callMeBack(step.next)
     funcflow(steps, @done)
 
-test "callback parameters", ()->
+test "CallbackParameters", ()->
     @expect(2)
     funcflow([
         (step, err)=>
@@ -40,7 +58,7 @@ test "callback parameters", ()->
             callMeBack(step.next)
     ], @done)
 
-test "parallel code", ()->
+test "ParallelCode", ()->
     funcflow([
         (step, err)=>
             callMeBack(step.spawn())
@@ -49,7 +67,7 @@ test "parallel code", ()->
             step.next()
     ], @done)
 
-test "basic error handling", ()->
+test "BasicErrorHandling", ()->
     @expect(2)
     funcflow([
         (step, err)=>
@@ -62,7 +80,7 @@ test "basic error handling", ()->
             step.next()
     ], @done)
 
-test "parallel error handling", ()->
+test "ParallelErrorHandling", ()->
     @expect(1)
     funcflow([
         (step, err)=>
@@ -75,17 +93,27 @@ test "parallel error handling", ()->
             step.next()
     ], @done)
 
-test "bubble error handling", ()->
+test "BubbleErrorHandling", ()->
     @expect(1)
     exThrown = false
     try
-        funcflow([(step, err)=>step.raise("some error")])
+        funcflow([(step, err)->step.raise("some error")])
+    catch ex
+        exThrown = true
+    @ok(exThrown)
+    @done()
+    
+test "DontCatchExceptions", ()->
+    @expect(1)
+    exThrown = false
+    try
+        funcflow([(step, err)->math.kj], {catchExceptions:false}, ()->)
     catch ex
         exThrown = true
     @ok(exThrown)
     @done()
 
-test "no callback", ()->
+test "NoCallback", ()->
     @expect(1)
     funcflow([
         (step, err)=>
@@ -93,7 +121,7 @@ test "no callback", ()->
     ])
     @done()
 
-test "basic state test", ()->
+test "BasicStateTest", ()->
     @expect(4)
     sharedState = {
         sharedstr: "not modified"

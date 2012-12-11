@@ -38,5 +38,6 @@ compress = (inputFile, callback) ->
      
 test = (inputFile, callback) ->
     console.log 'Testing "funcflow.coffee"'
-    test = require("./tests/tests.js")
+    tests = require("./tests/tests.js")
+    tests.RunAll()
     callback()
